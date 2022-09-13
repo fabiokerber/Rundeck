@@ -23,7 +23,6 @@ Vagrant.configure('2') do |config|
         rundeck.vm.box = 'debian/bullseye64'
         rundeck.vm.hostname = 'rundeck.aut.lab'
         rundeck.vm.network 'private_network', ip: ENV['RUNDECK_IP']
-        #rundeck.vm.network 'public_network', ip: ENV['RUNDECK_IP'], bridge: ENV['INTERFACE']
 
         rundeck.vm.provision 'shell', inline: 'sudo sed -i "/127.0.1.1/d" /etc/hosts'
         rundeck.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
@@ -80,37 +79,36 @@ Vagrant.configure('2') do |config|
 
         git.vm.box = 'debian/bullseye64'
         git.vm.hostname = 'git.aut.lab'
-        git.vm.network 'private_network', ip: ENV['LOG_IP']
+        git.vm.network 'private_network', ip: ENV['GIT_IP']
 
         git.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
         git.vm.provision 'shell', inline: 'echo "$IP srv01.aut.lab srv01" >> /etc/hosts', env: {"IP" => ENV['SRV01_IP']}
         git.vm.provision 'shell', inline: 'echo "$IP srv02.aut.lab srv02" >> /etc/hosts', env: {"IP" => ENV['SRV02_IP']}
 
         git.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
-        git.vm.provision 'shell', inline: 'sudo sysctl -w vm.max_map_count=262144'
         git.vm.provision 'shell', inline: 'sudo apt update'
+        git.vm.provision 'shell', inline: 'sudo apt install -y curl'
 
-        git.vm.provision 'shell', inline: 'sudo apt install -y vim git'
-        git.vm.provision 'shell', inline: 'sudo apt install -y ca-certificates curl gnupg2 software-properties-common acl'
-        git.vm.provision 'shell', inline: 'sudo mkdir -p /etc/apt/keyrings'
-        git.vm.provision 'shell', inline: 'curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
-        git.vm.provision 'shell', inline: 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null'
+        git.vm.provision 'shell', inline: 'sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -'
+        git.vm.provision 'shell', inline: 'sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"'
+        git.vm.provision 'shell', inline: 'sudo apt-get update'
+
+        git.vm.provision 'shell', inline: 'sudo apt-get install -y docker-ce ca-certificates curl openssh-server python ntpdate'
+        git.vm.provision 'shell', inline: 'sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
+        git.vm.provision 'shell', inline: 'sudo chmod +x /usr/local/bin/docker-compose'
+        git.vm.provision 'shell', inline: 'sudo curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash'
+
         git.vm.provision 'shell', inline: 'sudo apt update'
-        git.vm.provision 'shell', inline: 'sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin'
-        git.vm.provision 'shell', inline: 'sudo systemctl restart docker'
-        git.vm.provision 'shell', inline: 'sudo setfacl -m user:vagrant:rw /var/run/docker.sock'
-        git.vm.provision 'shell', inline: 'sudo usermod -aG docker vagrant'
-
-        git.vm.provision 'shell', inline: 'mkdir -p /home/vagrant/volumes/{grafana,elk}'
-        git.vm.provision 'shell', inline: 'sudo chown vagrant. -R /home/vagrant/volumes'
-        git.vm.provision 'shell', inline: 'docker network create grafana-net'
-        git.vm.provision 'shell', inline: 'docker run -d --user 1000 -v /home/vagrant/volumes/grafana/:/var/lib/grafana -p 3000:3000 --restart always --name=grafana --network=grafana-net grafana/grafana'
-        git.vm.provision 'shell', inline: 'docker compose -f /vagrant/files/elk-docker-compose.yml up -d'
+        git.vm.provision 'shell', inline: 'sudo apt install -y gitlab-ce'
+        #git.vm.provision 'shell', inline: 'sudo bash -c 'echo "external_url 'http://192.168.56.11'" > /etc/gitlab/gitlab.rb'
+        #git.vm.provision 'shell', inline: 'sudo gitlab-ctl reconfigure'
+        #git.vm.provision 'shell', inline: 'cd /tmp && curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb"'
+        #git.vm.provision 'shell', inline: 'cd /tmp && sudo dpkg -i gitlab-runner_amd64.deb'
 
         git.vm.provider 'virtualbox' do |vb|
-            vb.memory = 4096
+            vb.memory = 2048
             vb.cpus = 4
-            vb.name = 'log.aut.lab'
+            vb.name = 'git.aut.lab'
             vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
 
         end
@@ -123,9 +121,8 @@ Vagrant.configure('2') do |config|
         srv01.vm.hostname = 'srv01.aut.lab'
         srv01.vm.network 'private_network', ip: ENV['SRV01_IP']
 
-        srv01.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['rundeck_IP']}
+        srv01.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
         srv01.vm.provision 'shell', inline: 'echo "$IP log.aut.lab log" >> /etc/hosts', env: {"IP" => ENV['LOG_IP']}
-        srv01.vm.provision 'shell', inline: 'echo "$IP zbx.aut.lab zbx" >> /etc/hosts', env: {"IP" => ENV['ZABBIX_IP']}
         srv01.vm.provision 'shell', inline: 'echo "$IP srv02.aut.lab srv02" >> /etc/hosts', env: {"IP" => ENV['SRV02_IP']}
 
         srv01.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
@@ -143,13 +140,12 @@ Vagrant.configure('2') do |config|
 
     config.vm.define 'srv02' do |srv02|
 
-        srv02.vm.box = 'rockylinux/8'
+        srv02.vm.box = 'centos/7'
         srv02.vm.hostname = 'srv02.aut.lab'
         srv02.vm.network 'private_network', ip: ENV['SRV02_IP']
 
-        srv02.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['rundeck_IP']}
+        srv02.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
         srv02.vm.provision 'shell', inline: 'echo "$IP log.aut.lab log" >> /etc/hosts', env: {"IP" => ENV['LOG_IP']}
-        srv02.vm.provision 'shell', inline: 'echo "$IP zbx.aut.lab zbx" >> /etc/hosts', env: {"IP" => ENV['ZABBIX_IP']}
         srv02.vm.provision 'shell', inline: 'echo "$IP srv01.aut.lab srv01" >> /etc/hosts', env: {"IP" => ENV['SRV01_IP']}
 
         srv02.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
