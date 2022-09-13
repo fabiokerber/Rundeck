@@ -1,0 +1,168 @@
+Vagrant.configure('2') do |config|
+
+    $script_rundeck = <<-SCRIPT
+        sudo bash -c 'echo "LC_ALL=en_US.utf8" >> /etc/default/locale
+        sudo bash -c 'echo "LANG=en_US.utf8" >> /etc/default/locale
+        sudo bash -c 'echo "LC_ALL=en_US.utf8" >> /etc/environment
+        sudo bash -c 'echo "LANG=en_US.utf8" >> /etc/environment
+        sudo bash -c 'echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections'
+        sudo bash -c 'echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections'
+        sudo bash -c 'rm "/etc/locale.gen"'
+        sudo bash -c 'dpkg-reconfigure --frontend noninteractive locales'
+    SCRIPT
+
+    config.env.enable
+    config.vm.boot_timeout = 1200
+
+    if Vagrant.has_plugin?("vagrant-vbguest")
+        config.vbguest.auto_update = false
+    end
+
+    config.vm.define 'rundeck' do |rundeck|
+
+        rundeck.vm.box = 'debian/bullseye64'
+        rundeck.vm.hostname = 'rundeck.aut.lab'
+        rundeck.vm.network 'private_network', ip: ENV['RUNDECK_IP']
+        #rundeck.vm.network 'public_network', ip: ENV['RUNDECK_IP'], bridge: ENV['INTERFACE']
+
+        rundeck.vm.provision 'shell', inline: 'sudo sed -i "/127.0.1.1/d" /etc/hosts'
+        rundeck.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
+        rundeck.vm.provision 'shell', inline: 'echo "$IP git.aut.lab log" >> /etc/hosts', env: {"IP" => ENV['GIT_IP']}
+        rundeck.vm.provision 'shell', inline: 'echo "$IP srv01.aut.lab srv01" >> /etc/hosts', env: {"IP" => ENV['SRV01_IP']}
+        rundeck.vm.provision 'shell', inline: 'echo "$IP srv02.aut.lab srv02" >> /etc/hosts', env: {"IP" => ENV['SRV02_IP']}
+
+        rundeck.vm.provision 'shell', inline: $script_rundeck
+        rundeck.vm.provision :reload
+
+        rundeck.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
+        rundeck.vm.provision 'shell', inline: 'sudo apt update'
+
+        rundeck.vm.provision 'shell', inline: 'sudo apt install -y libc6-dev vim git curl ca-certificates'
+        rundeck.vm.provision 'shell', inline: 'sudo apt install -y build-essential checkinstall'
+        rundeck.vm.provision 'shell', inline: 'sudo apt install -y libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev'
+
+        rundeck.vm.provision 'shell', inline: 'wget -O /tmp/Python-3.9.13.tgz  https://www.python.org/ftp/python/3.9.13/Python-3.9.13.tgz'
+        rundeck.vm.provision 'shell', inline: 'tar xzf /tmp/Python-3.9.13.tgz -C /usr/local/src/'
+        rundeck.vm.provision 'shell', inline: 'cd /usr/local/src/Python-3.9.13/ && ./configure --enable-optimizations && make altinstall'
+
+        rundeck.vm.provision 'shell', inline: 'pip3.9 install --upgrade pip && pip3.9 install --upgrade setuptools'
+        rundeck.vm.provision 'shell', inline: 'pip3.9 install setuptools_rust wheel && pip3.9 install ansible'
+        rundeck.vm.provision 'shell', inline: 'pip3.9 install psutil'
+        rundeck.vm.provision 'shell', inline: 'pip3.9 install ansible-tower-cli'
+
+        rundeck.vm.provision 'shell', inline: 'sudo mkdir -p /etc/ansible/roles'
+        rundeck.vm.provision 'shell', inline: 'sudo touch {/var/log/ansible.log,/etc/ansible/hosts}'
+        rundeck.vm.provision 'shell', inline: 'sudo chmod 777 /var/log/ansible.log'
+        rundeck.vm.provision 'shell', inline: 'sudo cp /vagrant/files/ansible.cfg /etc/ansible/'
+
+        rundeck.vm.provision 'shell', inline: 'sudo apt install -y openjdk-11-jre-headless'
+        rundeck.vm.provision 'shell', inline: 'sudo curl -L https://packages.rundeck.com/pagerduty/rundeck/gpgkey | sudo apt-key add -'
+        rundeck.vm.provision 'shell', inline: 'echo "deb https://packages.rundeck.com/pagerduty/rundeck/any/ any main" | sudo tee /etc/apt/sources.list.d/rundeck.list'
+        rundeck.vm.provision 'shell', inline: 'echo "deb-src https://packages.rundeck.com/pagerduty/rundeck/any/ any main" | sudo tee -a /etc/apt/sources.list.d/rundeck.list'
+        rundeck.vm.provision 'shell', inline: 'sudo apt update'
+        rundeck.vm.provision 'shell', inline: 'sudo apt install -y rundeck'
+        rundeck.vm.provision 'shell', inline: 'sudo sed -i "s/localhost/$IP/g" /etc/rundeck/framework.properties', env: {"IP" => ENV['RUNDECK_IP']}
+        rundeck.vm.provision 'shell', inline: 'sudo sed -i "s/localhost/$IP/g" /etc/rundeck/rundeck-config.properties', env: {"IP" => ENV['RUNDECK_IP']}
+        rundeck.vm.provision 'shell', inline: 'sudo systemctl enable rundeckd'
+        rundeck.vm.provision 'shell', inline: 'sudo systemctl estart rundeckd'
+
+        rundeck.vm.provider 'virtualbox' do |vb|
+            vb.memory = 4096
+            vb.cpus = 4
+            vb.name = 'rundeck.aut.lab'
+            vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+
+        end
+
+    end
+
+    config.vm.define 'git' do |git|
+
+        git.vm.box = 'debian/bullseye64'
+        git.vm.hostname = 'git.aut.lab'
+        git.vm.network 'private_network', ip: ENV['LOG_IP']
+
+        git.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
+        git.vm.provision 'shell', inline: 'echo "$IP srv01.aut.lab srv01" >> /etc/hosts', env: {"IP" => ENV['SRV01_IP']}
+        git.vm.provision 'shell', inline: 'echo "$IP srv02.aut.lab srv02" >> /etc/hosts', env: {"IP" => ENV['SRV02_IP']}
+
+        git.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
+        git.vm.provision 'shell', inline: 'sudo sysctl -w vm.max_map_count=262144'
+        git.vm.provision 'shell', inline: 'sudo apt update'
+
+        git.vm.provision 'shell', inline: 'sudo apt install -y vim git'
+        git.vm.provision 'shell', inline: 'sudo apt install -y ca-certificates curl gnupg2 software-properties-common acl'
+        git.vm.provision 'shell', inline: 'sudo mkdir -p /etc/apt/keyrings'
+        git.vm.provision 'shell', inline: 'curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
+        git.vm.provision 'shell', inline: 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null'
+        git.vm.provision 'shell', inline: 'sudo apt update'
+        git.vm.provision 'shell', inline: 'sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin'
+        git.vm.provision 'shell', inline: 'sudo systemctl restart docker'
+        git.vm.provision 'shell', inline: 'sudo setfacl -m user:vagrant:rw /var/run/docker.sock'
+        git.vm.provision 'shell', inline: 'sudo usermod -aG docker vagrant'
+
+        git.vm.provision 'shell', inline: 'mkdir -p /home/vagrant/volumes/{grafana,elk}'
+        git.vm.provision 'shell', inline: 'sudo chown vagrant. -R /home/vagrant/volumes'
+        git.vm.provision 'shell', inline: 'docker network create grafana-net'
+        git.vm.provision 'shell', inline: 'docker run -d --user 1000 -v /home/vagrant/volumes/grafana/:/var/lib/grafana -p 3000:3000 --restart always --name=grafana --network=grafana-net grafana/grafana'
+        git.vm.provision 'shell', inline: 'docker compose -f /vagrant/files/elk-docker-compose.yml up -d'
+
+        git.vm.provider 'virtualbox' do |vb|
+            vb.memory = 4096
+            vb.cpus = 4
+            vb.name = 'log.aut.lab'
+            vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+
+        end
+
+    end
+
+    config.vm.define 'srv01' do |srv01|
+
+        srv01.vm.box = 'ubuntu/focal64'
+        srv01.vm.hostname = 'srv01.aut.lab'
+        srv01.vm.network 'private_network', ip: ENV['SRV01_IP']
+
+        srv01.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['rundeck_IP']}
+        srv01.vm.provision 'shell', inline: 'echo "$IP log.aut.lab log" >> /etc/hosts', env: {"IP" => ENV['LOG_IP']}
+        srv01.vm.provision 'shell', inline: 'echo "$IP zbx.aut.lab zbx" >> /etc/hosts', env: {"IP" => ENV['ZABBIX_IP']}
+        srv01.vm.provision 'shell', inline: 'echo "$IP srv02.aut.lab srv02" >> /etc/hosts', env: {"IP" => ENV['SRV02_IP']}
+
+        srv01.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
+        srv01.vm.provision 'shell', inline: 'sudo apt update'
+
+        srv01.vm.provider 'virtualbox' do |vb|
+            vb.memory = 1024
+            vb.cpus = 2
+            vb.name = 'srv01.aut.lab'
+            vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+
+        end
+
+    end
+
+    config.vm.define 'srv02' do |srv02|
+
+        srv02.vm.box = 'rockylinux/8'
+        srv02.vm.hostname = 'srv02.aut.lab'
+        srv02.vm.network 'private_network', ip: ENV['SRV02_IP']
+
+        srv02.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['rundeck_IP']}
+        srv02.vm.provision 'shell', inline: 'echo "$IP log.aut.lab log" >> /etc/hosts', env: {"IP" => ENV['LOG_IP']}
+        srv02.vm.provision 'shell', inline: 'echo "$IP zbx.aut.lab zbx" >> /etc/hosts', env: {"IP" => ENV['ZABBIX_IP']}
+        srv02.vm.provision 'shell', inline: 'echo "$IP srv01.aut.lab srv01" >> /etc/hosts', env: {"IP" => ENV['SRV01_IP']}
+
+        srv02.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
+        srv02.vm.provision 'shell', inline: 'sudo yum install -y vim'
+
+        srv02.vm.provider 'virtualbox' do |vb|
+            vb.memory = 1024
+            vb.cpus = 2
+            vb.name = 'srv02.aut.lab'
+            vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
+
+        end
+
+    end
+
+end
