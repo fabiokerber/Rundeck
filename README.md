@@ -74,9 +74,17 @@ resources.source.1.type=file
 **UI - Project Settings**
 * Default Node Executor > SSH Key Storage Path > Select Private Key (pk)
 
+# Hosts
+**SSH - rundeck**
+* $ sudo vi /etc/ansible/hosts
+```
+[srv01]
+192.168.56.190
+```
+
 # API
 **SSH - rundeck**
-* $ < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
+> $ < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
 * $ echo <TOKEN> | wc -m (33)
 * $ sudo bash -c 'echo "rundeck.tokens.file=/etc/rundeck/tokens.properties" >> /etc/rundeck/framework.properties'
 * $ sudo bash -c 'echo "admin: <TOKEN>, build,architect,admin,user,deploy" >> /etc/rundeck/tokens.properties'
