@@ -14,36 +14,54 @@ http://IP:4440
 <project>
 <node name="srv01"
  description="Ubuntu Server"
- tags="Linux"
+ tags="Ubuntu"
  hostname="192.168.56.190"
- username="rundeck"
+ username.default="rundeck"
+ ssh-key-storage-path="keys/project/AtualizaInfo/private.key"
  />
 <node name="srv02"
  description="CentOS Server"
- tags="Linux"
+ tags="CentOS"
  hostname="192.168.56.191"
- username="rundeck"
+ username.default="rundeck"
  />
 </project>
 ```
 * sudo chown -R rundeck.rundeck /var/rundeck/projects/
 
 **UI - Project Settings**
-* Edit Configuration File (adicionar abaixo)
+* Edit Configuration File (insert below)
 ```
 resources.source.1.config.file=/var/rundeck/projects/AtualizaInfo/etc/resources.xml
 resources.source.1.config.generateFileAutomatically=true
 resources.source.1.config.includeServerNode=true
 resources.source.1.type=file
 ```
-* Nodes > Listar Nós
+* Nodes > List nodes
 
-**SSH - rundeck**
-```
-vagrant@rundeck:~$ sudo ssh-keygen -t rsa
-Generating public/private rsa key pair.
-Enter file in which to save the key (/root/.ssh/id_rsa): /var/lib/rundeck/.ssh/id_rsa
-```
+**SSH - srv01**
+* sudo useradd -r -m rundeck
+* sudo passwd rundeck
+* sudo update-alternatives --config editor (Debian/Ubuntu Server only)
+* sudo bash -c 'visudo'
+  * rundeck ALL=(ALL) NOPASSWD:ALL
+* sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+* sudo bash -c 'echo "AllowUsers root" >> /etc/ssh/sshd_config'
+* sudo bash -c 'echo "AllowUsers rundeck" >> /etc/ssh/sshd_config'
+* sudo bash -c 'echo "AllowUsers fabio" >> /etc/ssh/sshd_config'
+* sudo bash -c 'echo "AllowUsers vagrant" >> /etc/ssh/sshd_config'
+* sudo systemctl restart sshd
+
+**SSH - rundeck (user rundeck)**
+* sudo -u rundeck -s /bin/bash
+* ssh-keygen -t rsa
+* cp /var/lib/rundeck/.ssh/id_rsa /var/lib/rundeck/.ssh/id_rsa.bkp
+* ssh-keygen -p -N "" -m pem -f /var/lib/rundeck/.ssh/id_rsa
+* ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub rundeck@srv01
+* cat /var/lib/rundeck/.ssh/id_rsa
 
 **UI - Engrenagem**
-* Key Storage > Add or Upload a Key
+* Key Storage > Add or Upload a Key > Private Key (paste pk)
+
+**UI - Project Settings**
+* Default Node Executor > SSH Key Storage Path > Select Private Key (pk)

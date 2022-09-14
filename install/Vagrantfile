@@ -63,7 +63,7 @@ Vagrant.configure('2') do |config|
         rundeck.vm.provision 'shell', inline: 'sudo sed -i "s/localhost/$IP/g" /etc/rundeck/framework.properties', env: {"IP" => ENV['RUNDECK_IP']}
         rundeck.vm.provision 'shell', inline: 'sudo sed -i "s/localhost/$IP/g" /etc/rundeck/rundeck-config.properties', env: {"IP" => ENV['RUNDECK_IP']}
         rundeck.vm.provision 'shell', inline: 'sudo systemctl enable rundeckd'
-        rundeck.vm.provision 'shell', inline: 'sudo systemctl estart rundeckd'
+        rundeck.vm.provision 'shell', inline: 'sudo systemctl start rundeckd'
 
         rundeck.vm.provider 'virtualbox' do |vb|
             vb.memory = 4096
