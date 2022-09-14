@@ -74,7 +74,7 @@ resources.source.1.type=file
 * Default Node Executor > SSH Key Storage Path > Select Private Key (pk)
 
 # API
-**SSH - rundeck (user rundeck)**
+**SSH - rundeck**
 * $ < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
 * $ echo <TOKEN> | wc -m (33)
 * $ sudo bash -c 'echo "rundeck.tokens.file=/etc/rundeck/tokens.properties" >> /etc/rundeck/framework.properties'
@@ -85,3 +85,7 @@ resources.source.1.type=file
 * $ curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * $ curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * $ curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
+
+# API Import & Export Jobs
+* $ curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > job_export.xml
+* $ curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"job_export.xml"
