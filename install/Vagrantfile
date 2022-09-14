@@ -66,8 +66,8 @@ Vagrant.configure('2') do |config|
         rundeck.vm.provision 'shell', inline: 'sudo systemctl start rundeckd'
 
         rundeck.vm.provider 'virtualbox' do |vb|
-            vb.memory = 4096
-            vb.cpus = 4
+            vb.memory = 2048
+            vb.cpus = 2
             vb.name = 'rundeck.aut.lab'
             vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
 

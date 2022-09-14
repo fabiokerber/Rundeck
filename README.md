@@ -1,7 +1,12 @@
 # Rundeck
 
+**Links**
+https://docs.rundeck.com/docs/api/rundeck-api.html
+https://docs.rundeck.com/docs/administration/configuration/config-file-reference.html
+
 http://IP:4440
 
+# Project
 **UI - Criado projeto AtualizaInfo**
 * Workflow > ls -ltr /tmp
 * Nodes > Execute locally
@@ -24,6 +29,7 @@ http://IP:4440
  tags="CentOS"
  hostname="192.168.56.191"
  username.default="rundeck"
+ ssh-key-storage-path="keys/project/AtualizaInfo/private.key"
  />
 </project>
 ```
@@ -39,6 +45,7 @@ resources.source.1.type=file
 ```
 * Nodes > List nodes
 
+# Node
 **SSH - srv01**
 * sudo useradd -r -m rundeck
 * sudo passwd rundeck
@@ -65,3 +72,12 @@ resources.source.1.type=file
 
 **UI - Project Settings**
 * Default Node Executor > SSH Key Storage Path > Select Private Key (pk)
+
+# API
+**SSH - rundeck (user rundeck)**
+* < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
+* echo <TOKEN> | wc -m (33)
+* sudo bash -c 'echo "rundeck.tokens.file=/etc/rundeck/tokens.properties" >> /etc/rundeck/framework.properties'
+* sudo bash -c 'echo "admin: <TOKEN>, build,architect,admin,user,deploy" >> /etc/rundeck/tokens.properties'
+* sudo chown -R rundeck.rundeck /etc/rundeck/tokens.properties
+* sudo systemctl restart rundeckd
