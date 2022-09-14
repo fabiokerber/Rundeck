@@ -61,7 +61,7 @@ resources.source.1.type=file
 * cat /var/lib/rundeck/.ssh/id_rsa
 
 **UI - Engrenagem**
-* Key Storage > Add or Upload a Key > Private Key (paste pk)
+* Key Storage > Add or Upload a Key > Private Key > keys/project/AtualizaInfo/private.key (paste pk)
 
 **UI - Project Settings**
 * Default Node Executor > SSH Key Storage Path > Select Private Key (pk)
