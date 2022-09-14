@@ -3,11 +3,12 @@
 **Links**<br>
 https://docs.rundeck.com/docs/api/rundeck-api.html<br>
 https://docs.rundeck.com/docs/administration/configuration/config-file-reference.html<br>
+https://docs.rundeck.com/docs/manual/projects/<br>
 
 http://IP:4440
 
 # Project
-**UI - Criado projeto "AtualizaInfo"**
+**UI - Create project "AtualizaInfo"**
 * Workflow > ls -ltr /tmp
 * Nodes > Execute locally
 
@@ -67,7 +68,7 @@ resources.source.1.type=file
 * $ ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub rundeck@srv01
 * $ cat /var/lib/rundeck/.ssh/id_rsa
 
-**UI - Engrenagem**
+**UI - Gear**
 * Key Storage > Add or Upload a Key > Private Key > keys/project/AtualizaInfo/private.key (paste pk)
 
 **UI - Project Settings**
@@ -86,6 +87,7 @@ resources.source.1.type=file
 * $ curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * $ curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
 
-# API Import & Export Jobs
-* $ curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > job_export.xml
-* $ curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"job_export.xml"
+# API Import & Export Project/Jobs
+* $ curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml
+* $ curl --insecure -X GET http://192.168.56.180:4440/api/41/job/<JOB_ID>?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/install_package.xml
+* $ curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"

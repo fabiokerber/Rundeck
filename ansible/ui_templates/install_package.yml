@@ -1,0 +1,16 @@
+---
+
+- name: "SAPO - Install Package"
+  hosts: all
+  become: true
+  vars:
+    logbook: "SAPO - Install Package"
+  tasks:
+
+    - name: "install_package.yml"
+      include_tasks: /etc/ansible/roles/install_package.yml
+    
+    - name: "logbook"
+      include_tasks: /etc/ansible/roles/logbook.yml
+ 
+...

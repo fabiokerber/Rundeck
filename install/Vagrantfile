@@ -49,10 +49,11 @@ Vagrant.configure('2') do |config|
         rundeck.vm.provision 'shell', inline: 'pip3.9 install psutil'
         rundeck.vm.provision 'shell', inline: 'pip3.9 install ansible-tower-cli'
 
-        rundeck.vm.provision 'shell', inline: 'sudo mkdir -p /etc/ansible/roles'
+        rundeck.vm.provision 'shell', inline: 'sudo mkdir -p /etc/ansible/roles/vars'
         rundeck.vm.provision 'shell', inline: 'sudo touch {/var/log/ansible.log,/etc/ansible/hosts}'
         rundeck.vm.provision 'shell', inline: 'sudo chmod 777 /var/log/ansible.log'
         rundeck.vm.provision 'shell', inline: 'sudo cp /vagrant/files/ansible.cfg /etc/ansible/'
+        rundeck.vm.provision 'shell', inline: 'sudo chown -R rundeck.rundeck /etc/ansible/roles'
 
         rundeck.vm.provision 'shell', inline: 'sudo apt install -y openjdk-11-jre-headless'
         rundeck.vm.provision 'shell', inline: 'sudo curl -L https://packages.rundeck.com/pagerduty/rundeck/gpgkey | sudo apt-key add -'
