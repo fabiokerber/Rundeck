@@ -6,6 +6,9 @@ https://docs.rundeck.com/docs/administration/configuration/config-file-reference
 https://docs.rundeck.com/docs/manual/projects/<br>
 https://documenter.getpostman.com/view/95797/rundeck/7TNfX9k#intro<br>
 https://docs.rundeck.com/docs/manual/job-workflows.html#context-variables<br>
+https://docs.rundeck.com/docs/learning/tutorial/users.html<br>
+https://docs.rundeck.com/docs/administration/security/authentication.html#propertyfileloginmodule<br>
+https://docs.rundeck.com/docs/administration/configuration/database/<br>
 
 Rundeck admin | admin » http://IP:4440<br>
 Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
@@ -124,3 +127,13 @@ resources.source.1.type=file
     * SSH Passphrase from secure option: option.password
 
     * Privilege escalation method: sudo
+
+# User Add
+* sudo vi /etc/rundeck/realm.properties
+  * fabio:<PASSWORD>,user,admin,architect,deploy,build
+
+# !!!
+* User/pass plain text
+* Token plain text
+* API call > Ansible Extra Vars
+* Don't use the H2 embedded database for anything except testing and non-production. Use MariaDB, Mysql, Postgres or Oracle instead.
