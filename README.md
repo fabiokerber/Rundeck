@@ -98,7 +98,7 @@ resources.source.1.type=file
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
 
-# API Running Jobs with node filter
+# API Running Jobs (node filter)
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json' -d '{"filter":"srv01.aut.lab,srv02.aut.lab"}'
 
 # API Import & Export Project/Jobs
@@ -106,7 +106,7 @@ resources.source.1.type=file
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/job/<JOB_ID>?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/install_package.xml
 * curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
 
-# Job Template (Workflow)
+# Job Template (workflow)
 * Step 1
   * Local Command
     * Command: sudo bash -c 'printf ${node.name} > /etc/ansible/hosts'
