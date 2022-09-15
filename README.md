@@ -49,7 +49,6 @@ resources.source.1.type=file
 ```
 * Nodes > List nodes
 
-# Visudo Rundeck
 **SSH - rundeck**
 * sudo update-alternatives --config editor (Debian/Ubuntu Server only)
 * sudo bash -c 'visudo'
