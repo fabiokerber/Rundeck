@@ -5,7 +5,8 @@ https://docs.rundeck.com/docs/api/rundeck-api.html<br>
 https://docs.rundeck.com/docs/administration/configuration/config-file-reference.html<br>
 https://docs.rundeck.com/docs/manual/projects/<br>
 
-http://IP:4440
+Rundeck admin | admin » http://IP:4440<br>
+Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
 
 # Project
 **UI - Create project "AtualizaInfo"**
@@ -18,17 +19,17 @@ http://IP:4440
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-<node name="srv01"
+<node name="srv01.aut.lab"
  description="Ubuntu Server"
  tags="Ubuntu"
- hostname="192.168.56.190"
+ hostname="srv01.aut.lab"
  username.default="rundeck"
  ssh-key-storage-path="keys/project/AtualizaInfo/private.key"
  />
-<node name="srv02"
+<node name="srv02.aut.lab"
  description="CentOS Server"
  tags="CentOS"
- hostname="192.168.56.191"
+ hostname="srv02.aut.lab"
  username.default="rundeck"
  ssh-key-storage-path="keys/project/AtualizaInfo/private.key"
  />
@@ -66,6 +67,7 @@ resources.source.1.type=file
 * cp /var/lib/rundeck/.ssh/id_rsa /var/lib/rundeck/.ssh/id_rsa.bkp
 * ssh-keygen -p -N "" -m pem -f /var/lib/rundeck/.ssh/id_rsa
 * ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub rundeck@srv01
+* ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub rundeck@srv02
 * cat /var/lib/rundeck/.ssh/id_rsa
 
 **UI - Gear**
@@ -78,11 +80,11 @@ resources.source.1.type=file
 **SSH - rundeck**
 * sudo vi /etc/ansible/hosts
 ```
-[srv01]
-192.168.56.190
+srv01.aut.lab
+srv02.aut.lab
 ```
 
-# API
+# API Token
 **SSH - rundeck**
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
 * echo <TOKEN> | wc -m (33)
@@ -90,10 +92,13 @@ resources.source.1.type=file
 * sudo bash -c 'echo "admin: <TOKEN>, build,architect,admin,user,deploy" >> /etc/rundeck/tokens.properties'
 * sudo chown -R rundeck.rundeck /etc/rundeck/tokens.properties
 * sudo systemctl restart rundeckd
+
+# API Running Jobs
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/xml'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
+* curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json' 
 
 # API Import & Export Project/Jobs
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml

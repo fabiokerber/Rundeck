@@ -78,7 +78,7 @@ Vagrant.configure('2') do |config|
 
     config.vm.define 'git' do |git|
 
-        git.vm.box = 'debian/bullseye64'
+        git.vm.box = 'ubuntu/focal64'
         git.vm.hostname = 'git.aut.lab'
         git.vm.network 'private_network', ip: ENV['GIT_IP']
 
@@ -101,13 +101,15 @@ Vagrant.configure('2') do |config|
 
         git.vm.provision 'shell', inline: 'sudo apt update'
         git.vm.provision 'shell', inline: 'sudo apt install -y gitlab-ce'
-        #git.vm.provision 'shell', inline: 'sudo bash -c 'echo "external_url 'http://192.168.56.11'" > /etc/gitlab/gitlab.rb'
-        #git.vm.provision 'shell', inline: 'sudo gitlab-ctl reconfigure'
-        #git.vm.provision 'shell', inline: 'cd /tmp && curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb"'
-        #git.vm.provision 'shell', inline: 'cd /tmp && sudo dpkg -i gitlab-runner_amd64.deb'
+        git.vm.provision 'shell', inline: 'sudo mv /etc/gitlab/gitlab.rb /etc/gitlab/gitlab.rb.bkp'
+        git.vm.provision 'shell', inline: 'sudo cp /vagrant/files/gitlab.rb /etc/gitlab/'
+        git.vm.provision 'shell', inline: 'sudo sed -i "s/GIT_IP/$IP/g" /etc/gitlab/gitlab.rb', env: {"IP" => ENV['GIT_IP']}
+        git.vm.provision 'shell', inline: 'sudo gitlab-ctl reconfigure'
+        git.vm.provision 'shell', inline: 'cd /tmp && curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb"'
+        git.vm.provision 'shell', inline: 'cd /tmp && sudo dpkg -i gitlab-runner_amd64.deb'
 
         git.vm.provider 'virtualbox' do |vb|
-            vb.memory = 2048
+            vb.memory = 4096
             vb.cpus = 4
             vb.name = 'git.aut.lab'
             vb.customize ['modifyvm', :id, '--nicpromisc2', 'allow-all']
@@ -123,7 +125,7 @@ Vagrant.configure('2') do |config|
         srv01.vm.network 'private_network', ip: ENV['SRV01_IP']
 
         srv01.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
-        srv01.vm.provision 'shell', inline: 'echo "$IP log.aut.lab log" >> /etc/hosts', env: {"IP" => ENV['LOG_IP']}
+        srv01.vm.provision 'shell', inline: 'echo "$IP git.aut.lab git" >> /etc/hosts', env: {"IP" => ENV['GIT_IP']}
         srv01.vm.provision 'shell', inline: 'echo "$IP srv02.aut.lab srv02" >> /etc/hosts', env: {"IP" => ENV['SRV02_IP']}
 
         srv01.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
@@ -146,7 +148,7 @@ Vagrant.configure('2') do |config|
         srv02.vm.network 'private_network', ip: ENV['SRV02_IP']
 
         srv02.vm.provision 'shell', inline: 'echo "$IP rundeck.aut.lab rundeck" >> /etc/hosts', env: {"IP" => ENV['RUNDECK_IP']}
-        srv02.vm.provision 'shell', inline: 'echo "$IP log.aut.lab log" >> /etc/hosts', env: {"IP" => ENV['LOG_IP']}
+        srv02.vm.provision 'shell', inline: 'echo "$IP git.aut.lab git" >> /etc/hosts', env: {"IP" => ENV['GIT_IP']}
         srv02.vm.provision 'shell', inline: 'echo "$IP srv01.aut.lab srv01" >> /etc/hosts', env: {"IP" => ENV['SRV01_IP']}
 
         srv02.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}

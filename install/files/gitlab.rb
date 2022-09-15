@@ -1,0 +1,1 @@
+external_url 'http://GIT_IP'
