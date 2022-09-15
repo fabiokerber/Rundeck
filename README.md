@@ -13,8 +13,8 @@ http://IP:4440
 * Nodes > Execute locally
 
 **SSH - rundeck**
-* $ sudo mkdir -p /var/rundeck/projects/AtualizaInfo/etc
-* $ sudo vi /var/rundeck/projects/AtualizaInfo/etc/resources.xml
+$ sudo mkdir -p /var/rundeck/projects/AtualizaInfo/etc
+$ sudo vi /var/rundeck/projects/AtualizaInfo/etc/resources.xml
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
@@ -34,7 +34,7 @@ http://IP:4440
  />
 </project>
 ```
-* $ sudo chown -R rundeck.rundeck /var/rundeck/projects/
+ $ sudo chown -R rundeck.rundeck /var/rundeck/projects/
 
 **UI - Project Settings**
 * Edit Configuration File (insert below)
@@ -48,17 +48,17 @@ resources.source.1.type=file
 
 # Node
 **SSH - srv01**
-* $ sudo useradd -r -m rundeck
-* $ sudo passwd rundeck
-* $ sudo update-alternatives --config editor (Debian/Ubuntu Server only)
-* $ sudo bash -c 'visudo'
-  * rundeck ALL=(ALL) NOPASSWD:ALL
-* $ sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-* $ sudo bash -c 'echo "AllowUsers root" >> /etc/ssh/sshd_config'
-* $ sudo bash -c 'echo "AllowUsers rundeck" >> /etc/ssh/sshd_config'
-* $ sudo bash -c 'echo "AllowUsers fabio" >> /etc/ssh/sshd_config'
-* $ sudo bash -c 'echo "AllowUsers vagrant" >> /etc/ssh/sshd_config'
-* $ sudo systemctl restart sshd
+$ sudo useradd -r -m rundeck
+$ sudo passwd rundeck
+$ sudo update-alternatives --config editor (Debian/Ubuntu Server only)
+$ sudo bash -c 'visudo'
+    rundeck ALL=(ALL) NOPASSWD:ALL
+$ sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+$ sudo bash -c 'echo "AllowUsers root" >> /etc/ssh/sshd_config'
+$ sudo bash -c 'echo "AllowUsers rundeck" >> /etc/ssh/sshd_config'
+$ sudo bash -c 'echo "AllowUsers fabio" >> /etc/ssh/sshd_config'
+$ sudo bash -c 'echo "AllowUsers vagrant" >> /etc/ssh/sshd_config'
+$ sudo systemctl restart sshd
 
 **SSH - rundeck (rundeck user)**
 * $ sudo -u rundeck -s /bin/bash
@@ -84,7 +84,7 @@ resources.source.1.type=file
 
 # API
 **SSH - rundeck**
-> $ < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
+* $ < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
 * $ echo <TOKEN> | wc -m (33)
 * $ sudo bash -c 'echo "rundeck.tokens.file=/etc/rundeck/tokens.properties" >> /etc/rundeck/framework.properties'
 * $ sudo bash -c 'echo "admin: <TOKEN>, build,architect,admin,user,deploy" >> /etc/rundeck/tokens.properties'
