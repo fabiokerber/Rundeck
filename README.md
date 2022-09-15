@@ -4,6 +4,8 @@
 https://docs.rundeck.com/docs/api/rundeck-api.html<br>
 https://docs.rundeck.com/docs/administration/configuration/config-file-reference.html<br>
 https://docs.rundeck.com/docs/manual/projects/<br>
+https://documenter.getpostman.com/view/95797/rundeck/7TNfX9k#intro<br>
+https://docs.rundeck.com/docs/manual/job-workflows.html#context-variables<br>
 
 Rundeck admin | admin » http://IP:4440<br>
 Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
@@ -47,6 +49,12 @@ resources.source.1.type=file
 ```
 * Nodes > List nodes
 
+# Visudo Rundeck
+**SSH - rundeck**
+* sudo update-alternatives --config editor (Debian/Ubuntu Server only)
+* sudo bash -c 'visudo'
+  * rundeck ALL=(ALL) NOPASSWD:ALL
+
 # Node
 **SSH - srv01**
 * sudo useradd -r -m rundeck
@@ -76,14 +84,6 @@ resources.source.1.type=file
 **UI - Project Settings**
 * Default Node Executor > SSH Key Storage Path > Select Private Key (pk)
 
-# Hosts
-**SSH - rundeck**
-* sudo vi /etc/ansible/hosts
-```
-srv01.aut.lab
-srv02.aut.lab
-```
-
 # API Token
 **SSH - rundeck**
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
@@ -98,9 +98,30 @@ srv02.aut.lab
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
-* curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json' 
+
+# API Running Jobs with node filter
+* curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json' -d '{"filter":"srv01.aut.lab,srv02.aut.lab"}'
 
 # API Import & Export Project/Jobs
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/job/<JOB_ID>?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/install_package.xml
 * curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
+
+# Job Template (Workflow)
+* Step 1
+  * Local Command
+    * Command: sudo bash -c 'printf ${node.name} > /etc/ansible/hosts'
+    * Step Label: Local Hosts File
+
+* Step 2
+  * Ansible Playbook Inline Workflow Node Step
+    * Ansible binaries directory path: /usr/local/bin/
+    * Ansible base directory path: /etc/ansible/
+    * Playbook: ...
+    * Extra Variables: ...
+
+    * SSH Authentication: privateKey
+    * SSH User: rundeck
+    * SSH Passphrase from secure option: option.password
+
+    * Privilege escalation method: sudo
