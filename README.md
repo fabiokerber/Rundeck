@@ -137,3 +137,4 @@ resources.source.1.type=file
 * Token plain text
 * API call > Ansible Extra Vars
 * Don't use the H2 embedded database for anything except testing and non-production. Use MariaDB, Mysql, Postgres or Oracle instead.
+* Plugin Slack Notification
