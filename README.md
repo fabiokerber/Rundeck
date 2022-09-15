@@ -48,13 +48,13 @@ resources.source.1.type=file
 
 # Node
 **SSH - srv01**
-$ sudo useradd -r -m rundeck
-$ sudo passwd rundeck
-$ sudo update-alternatives --config editor (Debian/Ubuntu Server only)
-$ sudo bash -c 'visudo'
+> sudo useradd -r -m rundeck
+> sudo passwd rundeck
+> sudo update-alternatives --config editor (Debian/Ubuntu Server only)
+> sudo bash -c 'visudo'
     rundeck ALL=(ALL) NOPASSWD:ALL
-$ sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-$ sudo bash -c 'echo "AllowUsers root" >> /etc/ssh/sshd_config'
+> sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+> sudo bash -c 'echo "AllowUsers root" >> /etc/ssh/sshd_config'
 $ sudo bash -c 'echo "AllowUsers rundeck" >> /etc/ssh/sshd_config'
 $ sudo bash -c 'echo "AllowUsers fabio" >> /etc/ssh/sshd_config'
 $ sudo bash -c 'echo "AllowUsers vagrant" >> /etc/ssh/sshd_config'
