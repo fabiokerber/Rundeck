@@ -13,8 +13,8 @@ http://IP:4440
 * Nodes > Execute locally
 
 **SSH - rundeck**
-$ sudo mkdir -p /var/rundeck/projects/AtualizaInfo/etc
-$ sudo vi /var/rundeck/projects/AtualizaInfo/etc/resources.xml
+$ sudo mkdir -p /var/rundeck/projects/AtualizaInfo/etc<br>
+$ sudo vi /var/rundeck/projects/AtualizaInfo/etc/resources.xml<br>
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
