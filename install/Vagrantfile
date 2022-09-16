@@ -9,6 +9,7 @@ Vagrant.configure('2') do |config|
         sudo bash -c 'echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections'
         sudo bash -c 'rm "/etc/locale.gen"'
         sudo bash -c 'dpkg-reconfigure --frontend noninteractive locales'
+        sudo bash -c 'echo "let g:skip_defaults_vim = 1" >> /etc/vim/vimrc'
     SCRIPT
 
     config.env.enable
@@ -35,9 +36,6 @@ Vagrant.configure('2') do |config|
 
         rundeck.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
         rundeck.vm.provision 'shell', inline: 'sudo apt update'
-
-        rundeck.vm.provision 'shell', inline: 'touch ~/.vimrc'
-        rundeck.vm.provision 'shell', inline: 'sudo touch /root/.vimrc'
 
         rundeck.vm.provision 'shell', inline: 'sudo apt install -y libc6-dev vim git curl ca-certificates rsync'
         rundeck.vm.provision 'shell', inline: 'sudo apt install -y build-essential checkinstall'
@@ -133,6 +131,9 @@ Vagrant.configure('2') do |config|
 
         srv01.vm.provision 'shell', inline: 'sudo timedatectl set-timezone $TZ', env: {"TZ" => ENV['TIMEZONE']}
         srv01.vm.provision 'shell', inline: 'sudo apt update'
+
+        srv01.vm.provision 'shell', inline: 'touch ~/.vimrc'
+        srv01.vm.provision 'shell', inline: 'sudo touch /root/.vimrc'
 
         srv01.vm.provider 'virtualbox' do |vb|
             vb.memory = 1024

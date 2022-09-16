@@ -64,13 +64,11 @@ dataSource.password = <DB_PASS>
 * sudo systemctl restart rundeckd
 
 # Project
-**UI - Create project "AtualizaInfo"**
-* Workflow > ls -ltr /tmp
-* Nodes > Execute locally
+**UI - Create project "OPS"**
 
 **SSH - rundeck**
-* sudo mkdir -p /var/rundeck/projects/AtualizaInfo/etc<br>
-* sudo vi /var/rundeck/projects/AtualizaInfo/etc/resources.xml<br>
+* sudo mkdir -p /var/rundeck/projects/OPS/etc<br>
+* sudo vi /var/rundeck/projects/OPS/etc/resources.xml<br>
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
@@ -78,15 +76,15 @@ dataSource.password = <DB_PASS>
  description="Ubuntu Server"
  tags="Ubuntu"
  hostname="srv01.aut.lab"
- username.default="rundeck"
- ssh-key-storage-path="keys/project/AtualizaInfo/private.key"
+ username="rundeck"
+ ssh-key-storage-path="keys/private.key"
  />
 <node name="srv02.aut.lab"
  description="CentOS Server"
  tags="CentOS"
  hostname="srv02.aut.lab"
- username.default="rundeck"
- ssh-key-storage-path="keys/project/AtualizaInfo/private.key"
+ username="rundeck"
+ ssh-key-storage-path="keys/private.key"
  />
 </project>
 ```
@@ -95,7 +93,7 @@ dataSource.password = <DB_PASS>
 **UI - Project Settings**
 * Edit Configuration File (insert below)
 ```
-resources.source.1.config.file=/var/rundeck/projects/AtualizaInfo/etc/resources.xml
+resources.source.1.config.file=/var/rundeck/projects/OPS/etc/resources.xml
 resources.source.1.config.generateFileAutomatically=true
 resources.source.1.config.includeServerNode=true
 resources.source.1.type=file
@@ -108,7 +106,7 @@ resources.source.1.type=file
   * rundeck ALL=(ALL) NOPASSWD:ALL
 
 # Node
-**SSH - srv01**
+**SSH - srv01/srv02**
 * sudo useradd -r -m rundeck
 * sudo passwd rundeck
 * sudo update-alternatives --config editor (Debian/Ubuntu Server only)
@@ -131,10 +129,10 @@ resources.source.1.type=file
 * cat /var/lib/rundeck/.ssh/id_rsa
 
 **UI - Gear**
-* Key Storage > Add or Upload a Key > Private Key > keys/project/AtualizaInfo/private.key (paste pk)
+* Key Storage > Add or Upload a Key > Private Key > keys/private.key (paste rsa pk)
 
-**UI - Project Settings**
-* Default Node Executor > SSH Key Storage Path > Select Private Key (pk)
+**UI - Project Settings - Edit Configuration**
+* Default Node Executor > SSH Key Storage Path > Select Private Key (keys/private.key)
 
 # API Token
 **SSH - rundeck**
@@ -181,47 +179,6 @@ resources.source.1.type=file
     * SSH Passphrase from secure option: option.password
 
     * Privilege escalation method: sudo
-
-# PostgreSQL Installation 
-sudo apt-get install -y build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev libxslt-dev libssl-dev libxml2-utils xsltproc ccache
-sudo useradd postgres
-sudo mkdir /work
-wget -O /tmp/postgresql-14.5.tar.bz2  https://ftp.postgresql.org/pub/source/v14.5/postgresql-14.5.tar.bz2
-sudo tar xvf /tmp/postgresql-14.5.tar.bz2 -C /usr/local/src/
-cd /usr/local/src/postgresql-14.5 && sudo ./configure --prefix=/work/pgsql
-cd /usr/local/src/postgresql-14.5 && sudo make
-* sudo -u postgres -s /bin/bash
-* make check
-* exit
-cd /usr/local/src/postgresql-14.5 && sudo make install
-sudo mkdir -p /work/pgsql/data
-sudo chown postgres. /work/pgsql/data
-sudo -u postgres -s /bin/bash
-cd /work/pgsql
-bin/initdb -D data
-vi /work/pgsql/data/postgresql.conf
-
-listen_addresses = 'localhost'
-port = 5432
-max_connections = 100
-shared_buffers = 128MB
-dynamic_shared_memory_type = posix
-max_wal_size = 1GB
-min_wal_size = 80MB
-logging_collector = on
-log_directory = 'pg_log'
-log_filename = 'postgresql-%Y-%m-%d.log'
-log_rotation_age = 15d
-log_line_prefix = '%t %p %a %u %d %r'
-log_statement = 'mod'
-log_timezone = 'Europe/Lisbon'
-datestyle = 'iso, mdy'
-timezone = 'Europe/Lisbon'
-lc_messages = 'en_US.utf8'
-lc_monetary = 'en_US.utf8'
-lc_numeric = 'en_US.utf8'
-lc_time = 'en_US.utf8'
-default_text_search_config = 'pg_catalog.english'
 
 # !!!
 * User/pass plain text
