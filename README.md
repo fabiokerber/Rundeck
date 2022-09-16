@@ -9,6 +9,8 @@ https://docs.rundeck.com/docs/manual/job-workflows.html#context-variables<br>
 https://docs.rundeck.com/docs/learning/tutorial/users.html<br>
 https://docs.rundeck.com/docs/administration/security/authentication.html#propertyfileloginmodule<br>
 https://docs.rundeck.com/docs/administration/configuration/database/<br>
+https://www.digitalocean.com/community/tutorials/how-to-move-a-postgresql-data-directory-to-a-new-location-on-ubuntu-16-04<br>
+https://groups.google.com/g/rundeck-discuss/c/rXCY3dWy0CA<br>
 
 Rundeck admin | admin » http://IP:4440<br>
 Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
