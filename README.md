@@ -38,6 +38,7 @@ dataSource.url = jdbc:postgresql://pgsql.rundeck.local/rundeck
 dataSource.username = rundeckuser
 dataSource.password = <DB_PASS>
 ```
+* sudo systemctl restart rundeckd
 
 # Project
 **UI - Create project "AtualizaInfo"**
