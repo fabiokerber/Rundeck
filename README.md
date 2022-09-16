@@ -14,27 +14,48 @@ Rundeck admin | admin » http://IP:4440<br>
 Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
 
 # PostgreSQL Install
+**SSH - rundeck**
 * sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 * wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-* sudo apt-get update
-* sudo -u postgres -s /bin/bash
+* sudo apt update
+* sudo apt install -y postgresql-14
+* sudo systemctl enable postgresql --now
+* sudo vi /etc/postgresql/14/main/pg_hba.conf
+```
+#host   all             all             127.0.0.1/32            scram-sha-256
+host    all             all             127.0.0.1/32            trust
+```
+* sudo systemctl restart postgresql
+
+# PostgreSQL Change DB Location
+**SSH - rundeck**
+* sudo mkdir /work/
+* sudo systemctl stop postgresql
+* sudo rsync -av /var/lib/postgresql /work
+* sudo mv /var/lib/postgresql/14/main /var/lib/postgresql/14/main.bkp
+* sudo vi /etc/postgresql/14/main/postgresql.conf
+```
+#data_directory = '/var/lib/postgresql/14/main'
+data_directory = '/work/postgresql/14/main'
+```
+* sudo systemctl restart postgresql
 
 # Change Database Rundeck
 **SSH - rundeck**
-* sudo apt install -y postgresql-14
-* sudo systemctl start postgresql
-* sudo systemctl enable postgresql
 * sudo -u postgres -s /bin/bash
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;
 * psql
 * postgres=# create database rundeck;
 * postgres=# create user rundeckuser with password '<DB_PASS>';
 * postgres=# grant ALL privileges on database rundeck to rundeckuser;
+* postgres=# exit;
 * exit
 * sudo vi /etc/rundeck/rundeck-config.properties
 ```
+#dataSource.dbCreate = none
+#dataSource.url = jdbc:h2:file:/var/lib/rundeck/data/rundeckdb;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=MONTH,HOUR,MINUTE,YEAR,SECONDS
 dataSource.driverClassName = org.postgresql.Driver
-dataSource.url = jdbc:postgresql://pgsql.rundeck.local/rundeck
+dataSource.url = jdbc:postgresql://localhost:5432/rundeck
 dataSource.username = rundeckuser
 dataSource.password = <DB_PASS>
 ```
