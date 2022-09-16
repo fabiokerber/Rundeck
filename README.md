@@ -13,154 +13,31 @@ https://docs.rundeck.com/docs/administration/configuration/database/<br>
 Rundeck admin | admin » http://IP:4440<br>
 Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
 
-# PostgreSQL Installation 
-* sudo apt-get install -y build-essential libreadline-dev zlib1g-dev flex bison libxml2-dev libxslt-dev libssl-dev libxml2-utils xsltproc ccache
-* sudo useradd postgres
-* sudo mkdir /work
-* wget -O /tmp/postgresql-14.5.tar.bz2  https://ftp.postgresql.org/pub/source/v14.5/postgresql-14.5.tar.bz2
-* sudo tar xvf /tmp/postgresql-14.5.tar.bz2 -C /usr/local/src/
-* cd /usr/local/src/postgresql-14.5 && sudo ./configure --prefix=/work/pgsql
-* cd /usr/local/src/postgresql-14.5 && sudo make
+# PostgreSQL Install
+* sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+* wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+* sudo apt-get update
 * sudo -u postgres -s /bin/bash
-* make check
+
+# Change Database Rundeck
+**SSH - rundeck**
+* sudo apt install -y postgresql-14
+* sudo systemctl start postgresql
+* sudo systemctl enable postgresql
+* sudo -u postgres -s /bin/bash
+* < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;
+* psql
+* postgres=# create database rundeck;
+* postgres=# create user rundeckuser with password '<DB_PASS>';
+* postgres=# grant ALL privileges on database rundeck to rundeckuser;
 * exit
-* cd /usr/local/src/postgresql-14.5 && sudo make install
-* sudo mkdir -p /work/pgsql/data
-* sudo chown postgres. /work/pgsql/data
-* sudo -u postgres -s /bin/bash
-* cd /work/pgsql
-* bin/initdb -D data
-* vi /work/pgsql/data/postgresql.conf
-
+* sudo vi /etc/rundeck/rundeck-config.properties
 ```
-listen_addresses = 'localhost'
-port = 5432
-max_connections = 100
-shared_buffers = 128MB
-dynamic_shared_memory_type = posix
-max_wal_size = 1GB
-min_wal_size = 80MB
-logging_collector = on
-log_directory = 'pg_log'
-log_filename = 'postgresql-%Y-%m-%d.log'
-log_rotation_age = 15d
-log_line_prefix = '%t %p %a %u %d %r'
-log_statement = 'mod'
-log_timezone = 'Europe/Lisbon'
-datestyle = 'iso, mdy'
-timezone = 'Europe/Lisbon'
-lc_messages = 'en_US.utf8'
-lc_monetary = 'en_US.utf8'
-lc_numeric = 'en_US.utf8'
-lc_time = 'en_US.utf8'
-default_text_search_config = 'pg_catalog.english'
+dataSource.driverClassName = org.postgresql.Driver
+dataSource.url = jdbc:postgresql://pgsql.rundeck.local/rundeck
+dataSource.username = rundeckuser
+dataSource.password = <DB_PASS>
 ```
-* sudo vi /etc/profile
-```
-LD_LIBRARY_PATH=/work/pgsql/lib
-export LD_LIBRARY_PATH
-PATH=/work/pgsql/bin:$PATH
-export PATH
-```
-* sudo vi /etc/init.d/postgresql-service
-```
-#!/bin/bash   
-
-## EDIT FROM HERE
-
-# Installation prefix
-prefix=/work/pgsql
-   
-# Data directory
-PGDATA="/work/pgsql/data"
-   
-# Who to run the postmaster as, usually "postgres".  (NOT "root")
-PGUSER=postgres
-   
-# Where to keep a log file
-PGLOG="$PGDATA/pg_log"
-   
-# It's often a good idea to protect the postmaster from being killed by the
-# OOM killer (which will tend to preferentially kill the postmaster because
-# of the way it accounts for shared memory).  To do that, uncomment these
-# three lines:
-#PG_OOM_ADJUST_FILE=/proc/self/oom_score_adj
-#PG_MASTER_OOM_SCORE_ADJ=-1000
-#PG_CHILD_OOM_SCORE_ADJ=0
-# Older Linux kernels may not have /proc/self/oom_score_adj, but instead
-# /proc/self/oom_adj, which works similarly except for having a different
-# range of scores.  For such a system, uncomment these three lines instead:
-#PG_OOM_ADJUST_FILE=/proc/self/oom_adj
-#PG_MASTER_OOM_SCORE_ADJ=-17
-#PG_CHILD_OOM_SCORE_ADJ=0
-   
-## STOP EDITING HERE
-   
-# The path that is to be used for the script
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-   
-# What to use to control the postmaster
-PGCTL="$prefix/bin/pg_ctl"
-   
-set -e
-   
-# Only start if we can find pg_ctl
-test -x $PGCTL ||
-{
-    echo "$PGCTL not found"
-    if [ "$1" = "stop" ]
-    then exit 0
-    else exit 5
-    fi
-}
-   
-# If we want to tell child processes to adjust their OOM scores, set up the
-# necessary environment variables.  Can't just export them through the "su".
-if [ -e "$PG_OOM_ADJUST_FILE" -a -n "$PG_CHILD_OOM_SCORE_ADJ" ]
-then
-    DAEMON_ENV="PG_OOM_ADJUST_FILE=$PG_OOM_ADJUST_FILE PG_OOM_ADJUST_VALUE=$PG_CHILD_OOM_SCORE_ADJ"
-fi
-   
-# Parse command line parameters.
-case $1 in
-  start)
-    echo -n "Starting PostgreSQL: "
-    test -e "$PG_OOM_ADJUST_FILE" && echo "$PG_MASTER_OOM_SCORE_ADJ" > "$PG_OOM_ADJUST_FILE"
-    su - $PGUSER -c "$DAEMON_ENV $PGCTL start -w -D '$PGDATA' &" >>$PGLOG 2>&1
-    echo "ok"
-    ;;
-  stop)
-    echo -n "Stopping PostgreSQL: "
-    su - $PGUSER -c "$PGCTL stop -D '$PGDATA' -s -m fast"
-    echo "ok"
-    ;;
-  restart)
-    echo -n "Restarting PostgreSQL: "
-    su - $PGUSER -c "$PGCTL stop -D '$PGDATA' -s -m fast -w"
-    test -e "$PG_OOM_ADJUST_FILE" && echo "$PG_MASTER_OOM_SCORE_ADJ" > "$PG_OOM_ADJUST_FILE"
-    su - $PGUSER -c "$DAEMON_ENV $PGCTL start -w -D '$PGDATA' &" >>$PGLOG 2>&1
-    echo "ok"
-    ;;
-  reload)
-    echo -n "Reload PostgreSQL: "
-    su - $PGUSER -c "$PGCTL reload -D '$PGDATA' -s"
-    echo "ok"
-    ;;
-  status)
-    su - $PGUSER -c "$PGCTL status -D '$PGDATA'"
-    ;;
-  *)
-    # Print help
-    echo "Usage: $0 {start|stop|restart|reload|status}" 1>&2
-    exit 1
-    ;;
-esac
-exit 0
-```
-* sudo chmod 755 /etc/init.d/postgresql-service 
-* sudo update-rc.d postgresql-service defaults
-* sudo service postgresql-service status
-* sudo service postgresql-service start
 
 # Project
 **UI - Create project "AtualizaInfo"**
