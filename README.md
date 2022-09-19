@@ -11,10 +11,11 @@ https://docs.rundeck.com/docs/administration/security/authentication.html#proper
 https://docs.rundeck.com/docs/administration/configuration/database/<br>
 https://www.digitalocean.com/community/tutorials/how-to-move-a-postgresql-data-directory-to-a-new-location-on-ubuntu-16-04<br>
 https://groups.google.com/g/rundeck-discuss/c/rXCY3dWy0CA<br>
+https://github.com/rundeck/rundeck-exporter-demo<br>
 https://docs.rundeck.com/docs/learning/howto/rundeck-exporter.html<br>
+https://github.com/giannamiggins/magicdeck<br>
 
 Rundeck admin | admin » http://IP:4440<br>
-Grafana admin | admin » http://IP:3000<br>
 
 ## PostgreSQL Install
 **SSH - rundeck**
@@ -193,6 +194,5 @@ resources.source.1.type=file
 * User/pass plain text
 * Token plain text
 * API call > Ansible Extra Vars
-* Don't use the H2 embedded database for anything except testing and non-production. Use MariaDB, Mysql, Postgres or Oracle instead.
 * Plugin Slack Notification
 * FQDN > /etc/rundeck/framework.properties
