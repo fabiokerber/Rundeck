@@ -191,8 +191,6 @@ resources.source.1.type=file
 * curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
 
 # !!!
-* User/pass plain text
-* Token plain text
 * API call > Ansible Extra Vars
 * Plugin Slack Notification
 * FQDN > /etc/rundeck/framework.properties
