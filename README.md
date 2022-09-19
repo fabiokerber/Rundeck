@@ -43,7 +43,7 @@ data_directory = '/work/postgresql/14/main'
 * sudo systemctl restart postgresql
 
 # Change Database Rundeck
-**SSH - rundeck**
+**SSH - srv rundeck**
 * sudo -u postgres -s /bin/bash
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;
 * psql
@@ -66,7 +66,7 @@ dataSource.password = <DB_PASS>
 # Project
 **UI - Create project "OPS"**
 
-**SSH - rundeck**
+**SSH - srv rundeck**
 * sudo mkdir -p /var/rundeck/projects/OPS/etc<br>
 * sudo vi /var/rundeck/projects/OPS/etc/resources.xml<br>
 ```
@@ -76,14 +76,14 @@ dataSource.password = <DB_PASS>
  description="Ubuntu Server"
  tags="Ubuntu"
  hostname="srv01.aut.lab"
- username="rundeck"
+ username="runner"
  ssh-key-storage-path="keys/private.key"
  />
 <node name="srv02.aut.lab"
  description="CentOS Server"
  tags="CentOS"
  hostname="srv02.aut.lab"
- username="rundeck"
+ username="runner"
  ssh-key-storage-path="keys/private.key"
  />
 </project>
@@ -100,21 +100,21 @@ resources.source.1.type=file
 ```
 * Nodes > List nodes
 
-**SSH - rundeck**
+**SSH - srv rundeck**
 * sudo update-alternatives --config editor (Debian/Ubuntu Server only)
 * sudo bash -c 'visudo'
   * rundeck ALL=(ALL) NOPASSWD:ALL
 
 # Node
 **SSH - srv01/srv02**
-* sudo useradd -r -m rundeck
-* sudo passwd rundeck
+* sudo useradd -r -m runner
+* sudo passwd runner
 * sudo update-alternatives --config editor (Debian/Ubuntu Server only)
 * sudo bash -c 'visudo'
-  * rundeck ALL=(ALL) NOPASSWD:ALL
+  * runner ALL=(ALL) NOPASSWD:ALL
 * sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 * sudo bash -c 'echo "AllowUsers root" >> /etc/ssh/sshd_config'
-* sudo bash -c 'echo "AllowUsers rundeck" >> /etc/ssh/sshd_config'
+* sudo bash -c 'echo "AllowUsers runner" >> /etc/ssh/sshd_config'
 * sudo bash -c 'echo "AllowUsers fabio" >> /etc/ssh/sshd_config'
 * sudo bash -c 'echo "AllowUsers vagrant" >> /etc/ssh/sshd_config'
 * sudo systemctl restart sshd
@@ -124,8 +124,8 @@ resources.source.1.type=file
 * ssh-keygen -t rsa
 * cp /var/lib/rundeck/.ssh/id_rsa /var/lib/rundeck/.ssh/id_rsa.bkp
 * ssh-keygen -p -N "" -m pem -f /var/lib/rundeck/.ssh/id_rsa
-* ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub rundeck@srv01
-* ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub rundeck@srv02
+* ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub runner@srv01
+* ssh-copy-id -i /var/lib/rundeck/.ssh/id_rsa.pub runner@srv02
 * cat /var/lib/rundeck/.ssh/id_rsa
 
 **UI - Gear**
@@ -135,13 +135,44 @@ resources.source.1.type=file
 * Default Node Executor > SSH Key Storage Path > Select Private Key (keys/private.key)
 
 # API Token
-**SSH - rundeck**
+**SSH - rundeck (vagrant user)**
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
 * echo <TOKEN> | wc -m (33)
 * sudo bash -c 'echo "rundeck.tokens.file=/etc/rundeck/tokens.properties" >> /etc/rundeck/framework.properties'
 * sudo bash -c 'echo "admin: <TOKEN>, build,architect,admin,user,deploy" >> /etc/rundeck/tokens.properties'
 * sudo chown -R rundeck.rundeck /etc/rundeck/tokens.properties
 * sudo systemctl restart rundeckd
+
+# User Add
+* sudo vi /etc/rundeck/realm.properties
+  * fabio:<PASSWORD>,user,admin,architect,deploy,build
+
+# Job Template (workflow)
+**UI - Jobs - New Job**
+* Job Name: Install Package | Ansible
+
+* Step 1
+  * Local Command
+    * Command: sudo bash -c 'printf ${node.name} > /etc/ansible/hosts'
+    * Step Label: Local Hosts File
+
+* Step 2
+  * Ansible Playbook Inline Workflow Node Step
+    * Ansible binaries directory path: /usr/local/bin/
+    * Ansible base directory path: /etc/ansible/
+    * Playbook: <install_package.yml>
+    * Extra Variables: <package: tree>
+
+    * SSH Authentication: privateKey
+    * SSH User: runner
+    * SSH Passphrase from secure option: option.password
+
+    * Privilege escalation method: sudo
+
+**SSH - rundeck (rundeck user)**
+* sudo -u rundeck -s /bin/bash
+* vi /etc/ansible/roles/install_package.yml
+* vi /etc/ansible/roles/logbook.yml
 
 # API Running Jobs
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/xml'
@@ -156,29 +187,6 @@ resources.source.1.type=file
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/job/<JOB_ID>?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/install_package.xml
 * curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
-
-# User Add
-* sudo vi /etc/rundeck/realm.properties
-  * fabio:<PASSWORD>,user,admin,architect,deploy,build
-
-# Job Template (workflow)
-* Step 1
-  * Local Command
-    * Command: sudo bash -c 'printf ${node.name} > /etc/ansible/hosts'
-    * Step Label: Local Hosts File
-
-* Step 2
-  * Ansible Playbook Inline Workflow Node Step
-    * Ansible binaries directory path: /usr/local/bin/
-    * Ansible base directory path: /etc/ansible/
-    * Playbook: ...
-    * Extra Variables: ...
-
-    * SSH Authentication: privateKey
-    * SSH User: rundeck
-    * SSH Passphrase from secure option: option.password
-
-    * Privilege escalation method: sudo
 
 # !!!
 * User/pass plain text
