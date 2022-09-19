@@ -11,11 +11,12 @@ https://docs.rundeck.com/docs/administration/security/authentication.html#proper
 https://docs.rundeck.com/docs/administration/configuration/database/<br>
 https://www.digitalocean.com/community/tutorials/how-to-move-a-postgresql-data-directory-to-a-new-location-on-ubuntu-16-04<br>
 https://groups.google.com/g/rundeck-discuss/c/rXCY3dWy0CA<br>
+https://docs.rundeck.com/docs/learning/howto/rundeck-exporter.html<br>
 
 Rundeck admin | admin » http://IP:4440<br>
 Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
 
-# PostgreSQL Install
+## PostgreSQL Install
 **SSH - rundeck**
 * sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 * wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
