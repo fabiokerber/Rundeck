@@ -14,7 +14,7 @@ https://groups.google.com/g/rundeck-discuss/c/rXCY3dWy0CA<br>
 https://docs.rundeck.com/docs/learning/howto/rundeck-exporter.html<br>
 
 Rundeck admin | admin » http://IP:4440<br>
-Gitlab root | /etc/gitlab/initial_root_password » http://IP<br>
+Grafana admin | admin » http://IP:3000<br>
 
 ## PostgreSQL Install
 **SSH - rundeck**
@@ -30,7 +30,7 @@ host    all             all             127.0.0.1/32            trust
 ```
 * sudo systemctl restart postgresql
 
-# PostgreSQL Change DB Location
+## PostgreSQL Change DB Location
 **SSH - rundeck**
 * sudo mkdir /work/
 * sudo systemctl stop postgresql
@@ -43,7 +43,7 @@ data_directory = '/work/postgresql/14/main'
 ```
 * sudo systemctl restart postgresql
 
-# Change Database Rundeck
+## Change Database Rundeck
 **SSH - srv rundeck**
 * sudo -u postgres -s /bin/bash
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;
@@ -64,7 +64,7 @@ dataSource.password = <DB_PASS>
 ```
 * sudo systemctl restart rundeckd
 
-# Project
+## Project
 **UI - Create project "OPS"**
 
 **SSH - srv rundeck**
@@ -106,7 +106,7 @@ resources.source.1.type=file
 * sudo bash -c 'visudo'
   * rundeck ALL=(ALL) NOPASSWD:ALL
 
-# Node
+## Node
 **SSH - srv01/srv02**
 * sudo useradd -r -m runner
 * sudo passwd runner
@@ -135,7 +135,7 @@ resources.source.1.type=file
 **UI - Project Settings - Edit Configuration**
 * Default Node Executor > SSH Key Storage Path > Select Private Key (keys/private.key)
 
-# API Token
+## API Token
 **SSH - rundeck (vagrant user)**
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
 * echo <TOKEN> | wc -m (33)
@@ -148,7 +148,7 @@ resources.source.1.type=file
 * sudo vi /etc/rundeck/realm.properties
   * fabio:<PASSWORD>,user,admin,architect,deploy,build
 
-# Job Template (workflow)
+## Job Template (workflow)
 **UI - Jobs - New Job**
 * Job Name: Install Package | Ansible
 
@@ -175,16 +175,16 @@ resources.source.1.type=file
 * vi /etc/ansible/roles/install_package.yml
 * vi /etc/ansible/roles/logbook.yml
 
-# API Running Jobs
+## API Running Jobs
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/xml'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
 
-# API Running Jobs (node filter)
+## API Running Jobs (node filter)
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json' -d '{"filter":"srv01.aut.lab,srv02.aut.lab"}'
 
-# API Import & Export Project/Jobs
+## API Import & Export Project/Jobs
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/job/<JOB_ID>?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/install_package.xml
 * curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
