@@ -211,4 +211,7 @@ resources.source.1.type=file
 * API call > Ansible Extra Vars
 * Plugin Slack Notification
 * FQDN > /etc/rundeck/framework.properties
-* Authenticating Users
+* User Authentication
+* Send logs to ELK
+  * less /var/log/ansible.log
+  * ls /var/log/rundeck/
