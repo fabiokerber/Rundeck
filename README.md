@@ -108,7 +108,7 @@ resources.source.1.type=file
 * Nodes > List nodes
 
 **SSH - srv rundeck**
-* sudo update-alternatives --config editor (Debian/Ubuntu Server only)
+* sudo update-alternatives --config editor **(Debian/Ubuntu Server only)**
 * sudo bash -c 'visudo'
   * rundeck ALL=(ALL) NOPASSWD:ALL
 
@@ -116,7 +116,7 @@ resources.source.1.type=file
 **SSH - srv01/srv02**
 * sudo useradd -r -m runner
 * sudo passwd runner
-* sudo update-alternatives --config editor (Debian/Ubuntu Server only)
+* sudo update-alternatives --config editor **(Debian/Ubuntu Server only)**
 * sudo bash -c 'visudo'
   * runner ALL=(ALL) NOPASSWD:ALL
 * sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
@@ -182,23 +182,30 @@ resources.source.1.type=file
 * vi /etc/ansible/roles/logbook.yml
 
 ## API Get Info
-* curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=*<TOKEN>* -H 'Content-Type: application/xml'
+```
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/xml'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/OPS/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
-
+```
 ## API Running Jobs (with node filter)
+```
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json' -d '{"filter":"srv01.aut.lab,srv02.aut.lab"}'
+```
 
 ## API Get Job Execution (with step filter)
+```
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/<JOB_EXEC_ID>?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/<JOB_EXEC_ID>/output/step/<JOB_STEP_ID>?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * *curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/94/output/step/2?authtoken=SeosgBApLCzX0MD9p3qlo3A8j6KBBW-y -H 'Content-Type: application/json'*
+```
 
 ## API Import & Export Project/Jobs
+```
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/OPS/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/job/<JOB_ID>?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/install_package.xml
 * curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/OPS/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
+```
 
 # !!!
 * API call > Ansible Extra Vars
