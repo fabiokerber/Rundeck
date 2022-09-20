@@ -197,7 +197,7 @@ resources.source.1.type=file
 ```
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/<JOB_EXEC_ID>?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/<JOB_EXEC_ID>/output/step/<JOB_STEP_ID>?authtoken=<TOKEN> -H 'Content-Type: application/json'
-* *curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/94/output/step/2?authtoken=SeosgBApLCzX0MD9p3qlo3A8j6KBBW-y -H 'Content-Type: application/json'*
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/94/output/step/2?authtoken=SeosgBApLCzX0MD9p3qlo3A8j6KBBW-y -H 'Content-Type: application/json'
 ```
 
 ## API Import & Export Project/Jobs
