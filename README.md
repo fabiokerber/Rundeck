@@ -14,6 +14,7 @@ https://groups.google.com/g/rundeck-discuss/c/rXCY3dWy0CA<br>
 https://github.com/rundeck/rundeck-exporter-demo<br>
 https://docs.rundeck.com/docs/learning/howto/rundeck-exporter.html<br>
 https://github.com/giannamiggins/magicdeck<br>
+https://docs.rundeck.com/docs/administration/security/authentication.html#propertyfileloginmodule<br>
 
 Rundeck admin | admin » http://IP:4440<br>
 
@@ -75,18 +76,22 @@ dataSource.password = <DB_PASS>
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
 <node name="srv01.aut.lab"
- description="Ubuntu Server"
- tags="Ubuntu"
+ description="Auth Server"
+ tags="prd"
  hostname="srv01.aut.lab"
  username="runner"
  ssh-key-storage-path="keys/private.key"
+ distribution="ubuntu"
+ distribution-version="20.04"
  />
 <node name="srv02.aut.lab"
- description="CentOS Server"
- tags="CentOS"
+ description="File Server"
+ tags="stg"
  hostname="srv02.aut.lab"
  username="runner"
  ssh-key-storage-path="keys/private.key"
+ distribution="centos"
+ distribution-version="7.8"
  />
 </project>
 ```
@@ -176,21 +181,27 @@ resources.source.1.type=file
 * vi /etc/ansible/roles/install_package.yml
 * vi /etc/ansible/roles/logbook.yml
 
-## API Running Jobs
+## API Get Info
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/xml'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
-* curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
-* curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/project/OPS/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 
-## API Running Jobs (node filter)
+## API Running Jobs (with node filter)
+* curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X POST http://192.168.56.180:4440/api/41/job/<JOB_ID>/run?authtoken=<TOKEN> -H 'Content-Type: application/json' -d '{"filter":"srv01.aut.lab,srv02.aut.lab"}'
 
+## API Get Job Execution (with step filter)
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/<JOB_EXEC_ID>?authtoken=<TOKEN> -H 'Content-Type: application/json'
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/<JOB_EXEC_ID>/output/step/<JOB_STEP_ID>?authtoken=<TOKEN> -H 'Content-Type: application/json'
+* *curl --insecure -X GET http://192.168.56.180:4440/api/41/execution/94/output/step/2?authtoken=SeosgBApLCzX0MD9p3qlo3A8j6KBBW-y -H 'Content-Type: application/json'*
+
 ## API Import & Export Project/Jobs
-* curl --insecure -X GET http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/project/OPS/jobs/export?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/project_export.xml
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/job/<JOB_ID>?authtoken=<TOKEN> -H 'Content-Type: application/xml' > /tmp/install_package.xml
-* curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/AtualizaInfo/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
+* curl -v -H x-rundeck-auth-token:<TOKEN> http://192.168.56.180:4440/api/41/project/OPS/jobs/import -F xmlBatch=@"/import_templates/job_export.xml"
 
 # !!!
 * API call > Ansible Extra Vars
 * Plugin Slack Notification
 * FQDN > /etc/rundeck/framework.properties
+* Authenticating Users
