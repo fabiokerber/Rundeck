@@ -182,7 +182,7 @@ resources.source.1.type=file
 * vi /etc/ansible/roles/logbook.yml
 
 ## API Get Info
-* curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/xml'
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=*<TOKEN>* -H 'Content-Type: application/xml'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/project/OPS/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
 
