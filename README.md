@@ -67,8 +67,6 @@ dataSource.password = <DB_PASS>
 * sudo systemctl restart rundeckd
 
 ## Project
-**UI - Create project "OPS"**
-
 **SSH - srv rundeck**
 * sudo mkdir -p /var/rundeck/projects/OPS/etc<br>
 * sudo vi /var/rundeck/projects/OPS/etc/resources.xml<br>
@@ -96,6 +94,8 @@ dataSource.password = <DB_PASS>
 </project>
 ```
 * sudo chown -R rundeck.rundeck /var/rundeck/projects/
+
+**UI - Create project "OPS"**
 
 **UI - Project Settings**
 * Edit Configuration File (insert below)
