@@ -164,6 +164,11 @@ resources.source.1.type=file
     * Step Label: Local Hosts File
 
 * Step 2
+  * Local Command
+    * Command: sudo bash -c 'printf "%s\n" "`date +'%d%m%Y-%H%M%S'` | ${job.username} | ${job.project} - ${job.execid} - ${job.name}" >> /var/log/ansible_plays.log'
+    * Step Label: Local Log Plays
+
+* Step 3
   * Ansible Playbook Inline Workflow Node Step
     * Ansible binaries directory path: /usr/local/bin/
     * Ansible base directory path: /etc/ansible/

@@ -2,7 +2,7 @@
 
 - name: LOGBOOK
   lineinfile:
-    path: /var/log/ansible_playbook.log
+    path: /var/log/ansible_plays.log
     line: "{{ lookup('pipe','TZ=\"Europe/Lisbon\" date +%d/%m/%Y-%H:%M:%S') }} - Exec {{ logbook | upper }}"
     create: yes
 
