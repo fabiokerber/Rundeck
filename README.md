@@ -161,12 +161,12 @@ resources.source.1.type=file
 * Step 1
   * Local Command
     * Command: sudo bash -c 'printf ${node.name} > /etc/ansible/hosts'
-    * Step Label: Local Hosts File
+    * Step Label: Local Hosts File ( /etc/ansible/hosts )
 
 * Step 2
   * Local Command
     * Command: sudo bash -c 'printf "%s\n" "`date +'%d%m%Y-%H%M%S'` | ${job.username} | ${job.project} - ${job.execid} - ${job.name}" >> /var/log/ansible_plays.log'
-    * Step Label: Local Log Plays
+    * Step Label: Local Log Plays ( date | username | project - job id - job name )
 
 * Step 3
   * Ansible Playbook Inline Workflow Node Step
