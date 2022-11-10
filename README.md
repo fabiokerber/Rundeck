@@ -144,9 +144,9 @@ resources.source.1.type=file
 ## API Token
 **SSH - rundeck (vagrant user)**
 * < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo; 
-* echo <TOKEN> | wc -m (33)
-* sudo bash -c 'echo "rundeck.tokens.file=/etc/rundeck/tokens.properties" >> /etc/rundeck/framework.properties'
-* sudo bash -c 'echo "admin: <TOKEN>, build,architect,admin,user,deploy" >> /etc/rundeck/tokens.properties'
+* echo <TOKEN> | wc -m (33 characters count)
+* sudo bash -c 'echo -e "\n# ----------------------------------------------------------------\n# Tokens\n# ----------------------------------------------------------------\nrundeck.tokens.file=/etc/rundeck/tokens.properties" >> /etc/rundeck/framework.properties'
+* sudo bash -c 'echo -e "\n# ----------------------------------------------------------------\n# Tokens\n# ----------------------------------------------------------------\nadmin: <TOKEN>, build,architect,admin,user,deploy" >> /etc/rundeck/tokens.properties'
 * sudo chown -R rundeck.rundeck /etc/rundeck/tokens.properties
 * sudo systemctl restart rundeckd
 
@@ -190,7 +190,7 @@ resources.source.1.type=file
 ```
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/xml'
 * curl --insecure -X GET http://192.168.56.180:4440/api/41/projects?authtoken=<TOKEN> -H 'Content-Type: application/json'
-* curl --insecure -X GET http://192.168.56.180:4440/api/41/project/OPS/jobs?authtoken=<TOKEN> -H 'Content-Type: application/json'
+* curl --insecure -X GET http://192.168.56.180:4440/api/41/project/OPS/jobs?authtoken=<TOKEN>?pretty -H 'Content-Type: application/json'
 ```
 ## API Running Jobs (with node filter)
 ```
